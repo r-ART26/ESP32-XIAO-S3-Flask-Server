@@ -66,6 +66,12 @@
             font-size: 14px;
         }
     </style>
+
+    <script>
+        const startCameraUrl = "{{ url_for('parte1a.start_camera_route') }}";
+        const stopCameraUrl = "{{ url_for('parte1a.stop_camera_route') }}";
+    </script>
+
 </head>
 
 <body class="container">
@@ -82,6 +88,11 @@
             </button>
             {% endfor %}
         </div>
+
+        <div>
+            <button class="filter-btn" onclick="toggleCamera('start')">Activar Cámara</button>
+            <button class="filter-btn" onclick="toggleCamera('stop')">Desactivar Cámara</button>
+        </div>
     </div>
 
     <!-- Contenedor de video -->
@@ -93,6 +104,22 @@
     </div>
 
     <script>
+        function toggleCamera(action) {
+            const url = action === 'start' ? startCameraUrl : stopCameraUrl;
+            fetch(url)
+                .then(() => {
+                    console.log(`Cámara ${action === 'start' ? 'activada' : 'desactivada'}`);
+                    // Actualizar estado visual de los botones
+                    document.querySelectorAll('.filter-btn').forEach(btn => {
+                        if (btn.textContent.includes('Activar')) {
+                            btn.disabled = action === 'start';
+                        } else {
+                            btn.disabled = action === 'stop';
+                        }
+                    });
+                });
+        }
+
         function updateFilter(filter, button) {
             // 1. Forzar recarga con timestamp
             const timestamp = new Date().getTime();

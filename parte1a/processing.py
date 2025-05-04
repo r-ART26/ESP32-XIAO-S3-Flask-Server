@@ -7,28 +7,50 @@ import atexit  # Para liberar la cámara al salir
 FRAME_WIDTH = 450
 FRAME_HEIGHT = 450
 MOTION_COLOR = (255, 0, 0)
-
-# Inicializar cámara (global, una sola vez)
-camera = cv2.VideoCapture(0)
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
-camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Reducir latencia
-
-# Verificar si la cámara se abrió correctamente
-if not camera.isOpened():
-    raise Exception("Error: No se pudo abrir la cámara. Verifica el índice (0, 1, 2) o permisos.")
+camera = None
+is_camera_active = False
 
 # Componentes de procesamiento
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=40, detectShadows=False)
 
+def start_camera():
+    global camera, is_camera_active
+    if not is_camera_active:
+        camera = cv2.VideoCapture(0)
+        camera.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
+        camera.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+        camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        is_camera_active = camera.isOpened()
+        print(f"Cámara iniciada: {is_camera_active}")
+
+def stop_camera():
+    global camera, is_camera_active
+    if camera and is_camera_active:
+        camera.release()
+        is_camera_active = False
+        print("Cámara detenida")
+
+
 def generate_frames(current_filter):
+    global is_camera_active
     prev_time = time.time()
     
     while True:
-        success, frame = camera.read()  # Usa la cámara ya inicializada
+        # Verificar estado de la cámara
+        if not is_camera_active or not camera.isOpened():
+            # Generar frame estático
+            placeholder = np.zeros((FRAME_HEIGHT, FRAME_WIDTH, 3), dtype=np.uint8)
+            cv2.putText(placeholder, "CAMARA DESACTIVADA", 
+                       (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            ret, buffer = cv2.imencode('.jpg', placeholder)
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            time.sleep(0.1)  # Reducir consumo CPU
+            continue
+        
+        # Captura normal si la cámara está activa
+        success, frame = camera.read()
         if not success:
-            print("Error leyendo la cámara")
             break
         
         frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT))

@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, Response, request
-from .processing import generate_frames
+from flask import Blueprint, render_template, Response, request, redirect, url_for
+from .processing import generate_frames, start_camera, stop_camera, is_camera_active
+
 
 parte1a_bp = Blueprint('parte1a', __name__, 
                       template_folder='templates',
@@ -30,3 +31,13 @@ def video_feed():
         generate_frames(current_filter),
         mimetype='multipart/x-mixed-replace; boundary=frame'
     )
+
+@parte1a_bp.route('/start_camera')
+def start_camera_route():
+    start_camera()
+    return redirect(url_for('parte1a.index'))
+
+@parte1a_bp.route('/stop_camera')
+def stop_camera_route():
+    stop_camera()
+    return redirect(url_for('parte1a.index'))
