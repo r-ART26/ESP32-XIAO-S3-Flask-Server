@@ -12,9 +12,25 @@ NOISE_TYPES = {
     'speckle': 'Speckle'
 }
 
+FILTER_TYPES = {
+    'gaussian': 'Gaussiano',
+    'median': 'Mediana',
+    'blur': 'Blur',
+    'none': 'Ninguno'
+}
+
+EDGE_TYPES = {
+    'sobel': 'Sobel',
+    'canny': 'Canny',
+    'none': 'Ninguno'
+}
+
 @parte1b_bp.route('/')
 def index():
-    return render_template('indexb.html', noise_types=NOISE_TYPES)
+    return render_template('indexb.html', 
+                          noise_types=NOISE_TYPES,
+                          filter_types=FILTER_TYPES,
+                          edge_types=EDGE_TYPES)
 
 @parte1b_bp.route('/video_feed')
 def video_feed():
@@ -23,11 +39,21 @@ def video_feed():
     mean = float(request.args.get('mean', 0))
     std = float(request.args.get('std', 0))
     var = float(request.args.get('var', 0))
-    kernel_size = int(request.args.get('kernel', 3))  # Nuevo parámetro para tamaño de máscara
+    kernel_size = int(request.args.get('kernel', 3))  # Tamaño de máscara
+    filter_type = request.args.get('filter', 'gaussian')  # Filtro de suavizado
+    edge_type = request.args.get('edge', 'none')  # Algoritmo de bordes
 
     # Validar tipo de ruido
     if noise_type not in NOISE_TYPES:
         noise_type = 'original'
+
+    # Validar filtro de suavizado
+    if filter_type not in FILTER_TYPES:
+        filter_type = 'gaussian'
+
+    # Validar algoritmo de bordes
+    if edge_type not in EDGE_TYPES:
+        edge_type = 'none'
 
     return Response(
         generate_frames(
@@ -35,7 +61,9 @@ def video_feed():
             mean=mean, 
             std=std, 
             var=var, 
-            kernel_size=kernel_size  # Pasar el nuevo parámetro
+            kernel_size=kernel_size,
+            filter_type=filter_type,
+            edge_type=edge_type
         ),
         mimetype='multipart/x-mixed-replace; boundary=frame'
     )

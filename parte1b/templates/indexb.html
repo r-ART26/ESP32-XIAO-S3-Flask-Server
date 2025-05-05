@@ -13,38 +13,73 @@
             color: black;
             text-align: center;
         }
+
+        .containerHeader {
+            background-color: #ffffff;
+            padding: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .containerHeader h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #333;
+        }
+
+        .containerHeader img {
+            width: 50%;
+            height: auto;
+            max-width: 600px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px;
         }
+
         .camera-controls {
             margin: 10px 0;
         }
+
         .controls {
             margin: 10px 0;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            max-width: 720px;
         }
+
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-width: 160px;
         }
+
         label {
             font-size: 14px;
             margin-bottom: 4px;
+            font-weight: bold;
         }
+
         input[type="range"], select {
             width: 150px;
         }
+
         #video-container {
-            max-width: 720px; /* 3 columnas * 240px (ancho máximo requerido) */
+            max-width: 720px;
             margin: 10px auto;
         }
+
         #video-stream {
             width: 100%;
             height: auto;
@@ -52,6 +87,7 @@
             border-radius: 5px;
             object-fit: contain;
         }
+
         .btn {
             padding: 8px 16px;
             margin: 4px;
@@ -62,59 +98,86 @@
             border-radius: 4px;
             transition: background-color 0.3s;
         }
+
         .btn:hover {
             background-color: #d0d0d0;
         }
     </style>
 </head>
-<body class="container">
+<body>
+    <!-- Header -->
     <div class="containerHeader">
-        <h1>Parte 1-b</h1>
+        <h1>Práctica 2 - Filtros y Detección de Bordes</h1>
         <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
     </div>
 
-    <!-- Botones de encender/apagar cámara -->
-    <div class="camera-controls">
-        <button class="btn" onclick="toggleCamera('start')">Encender</button>
-        <button class="btn" onclick="toggleCamera('stop')">Apagar</button>
-    </div>
+    <!-- Contenido principal -->
+    <div class="container">
+        <h2>Selector de Filtros y Bordes</h2>
 
-    <!-- Controles de ruido y tamaño de máscara -->
-    <div class="controls">
-        <!-- Selector de tipo de ruido -->
-        <div class="control-group">
-            <label for="noise-select">Tipo de Ruido:</label>
-            <select id="noise-select" onchange="updateParams()">
-                {% for key, label in noise_types.items() %}
-                <option value="{{ key }}">{{ label }}</option>
-                {% endfor %}
-            </select>
+        <!-- Botones de encender/apagar cámara -->
+        <div class="camera-controls">
+            <button class="btn" onclick="toggleCamera('start')">Encender</button>
+            <button class="btn" onclick="toggleCamera('stop')">Apagar</button>
         </div>
 
-        <!-- Parámetros de ruido -->
-        <div class="control-group" id="gaussian-controls">
-            <label for="mean-slider">Media (μ):</label>
-            <input type="range" id="mean-slider" min="-50" max="50" step="0.1" value="0" oninput="updateParams()">
-        </div>
-        <div class="control-group" id="std-controls">
-            <label for="std-slider">Desv. Estándar (σ):</label>
-            <input type="range" id="std-slider" min="0" max="50" step="0.1" value="0" oninput="updateParams()">
-        </div>
-        <div class="control-group" id="speckle-controls">
-            <label for="var-slider">Varianza (σ²):</label>
-            <input type="range" id="var-slider" min="0" max="1" step="0.01" value="0" oninput="updateParams()">
+        <!-- Controles de ruido, filtro y bordes -->
+        <div class="controls">
+            <!-- Selector de tipo de ruido -->
+            <div class="control-group">
+                <label for="noise-select">Tipo de Ruido:</label>
+                <select id="noise-select" onchange="updateParams()">
+                    {% for key, label in noise_types.items() %}
+                    <option value="{{ key }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Parámetros de ruido -->
+            <div class="control-group" id="gaussian-controls">
+                <label for="mean-slider">Media (μ):</label>
+                <input type="range" id="mean-slider" min="-50" max="50" step="0.1" value="0" oninput="updateParams()">
+            </div>
+            <div class="control-group" id="std-controls">
+                <label for="std-slider">Desv. Estándar (σ):</label>
+                <input type="range" id="std-slider" min="0" max="50" step="0.1" value="0" oninput="updateParams()">
+            </div>
+            <div class="control-group" id="speckle-controls">
+                <label for="var-slider">Varianza (σ²):</label>
+                <input type="range" id="var-slider" min="0" max="1" step="0.01" value="0" oninput="updateParams()">
+            </div>
+
+            <!-- Selector de tamaño de máscara -->
+            <div class="control-group">
+                <label for="kernel-slider">Tamaño de Máscara:</label>
+                <input type="range" id="kernel-slider" min="3" max="7" step="2" value="3" oninput="updateParams()">
+            </div>
+
+            <!-- Selector de filtro de suavizado -->
+            <div class="control-group">
+                <label for="filter-select">Filtro de Suavizado:</label>
+                <select id="filter-select" onchange="updateParams()">
+                    {% for key, label in filter_types.items() %}
+                    <option value="{{ key }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Selector de algoritmo de bordes -->
+            <div class="control-group">
+                <label for="edge-select">Algoritmo de Bordes:</label>
+                <select id="edge-select" onchange="updateParams()">
+                    {% for key, label in edge_types.items() %}
+                    <option value="{{ key }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <!-- Selector de tamaño de máscara -->
-        <div class="control-group">
-            <label for="kernel-slider">Tamaño de Máscara:</label>
-            <input type="range" id="kernel-slider" min="3" max="7" step="2" value="3" oninput="updateParams()">
+        <!-- Contenedor de video -->
+        <div id="video-container">
+            <img id="video-stream" src="{{ url_for('parte1b.video_feed') }}" alt="Flujo de video">
         </div>
-    </div>
-
-    <!-- Contenedor de video -->
-    <div id="video-container">
-        <img id="video-stream" src="{{ url_for('parte1b.video_feed') }}" alt="Flujo de video">
     </div>
 
     <script>
@@ -136,6 +199,8 @@
             const std = document.getElementById('std-slider').value;
             const varVal = document.getElementById('var-slider').value;
             const kernel = document.getElementById('kernel-slider').value;
+            const filterType = document.getElementById('filter-select').value;
+            const edgeType = document.getElementById('edge-select').value;
 
             // Mostrar/ocultar controles según el tipo de ruido
             document.getElementById('gaussian-controls').style.display = 
@@ -153,6 +218,8 @@
                 &std=${std}
                 &var=${varVal}
                 &kernel=${kernel}
+                &filter=${filterType}
+                &edge=${edgeType}
                 &t=${new Date().getTime()}`.replace(/\s+/g, '');
         }
 
