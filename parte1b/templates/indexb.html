@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parte 1B - Video Compacto</title>
+    <title>Parte 1B - Ruido en Video</title>
     <style>
         body {
             margin: 0;
@@ -19,8 +19,35 @@
             align-items: center;
             padding: 10px;
         }
-        .buttons {
+        .controls {
             margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        input[type="range"], select {
+            width: 150px;
+        }
+        #video-container {
+            max-width: 240px;
+            margin: 10px auto;
+        }
+        #video-stream {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            object-fit: contain;
         }
         .btn {
             padding: 8px 16px;
@@ -35,26 +62,42 @@
         .btn:hover {
             background-color: #d0d0d0;
         }
-        #video-container {
-            max-width: 240px;  /* Igual a FRAME_WIDTH */
-            margin: 0 auto;
-        }
-        #video-stream {
-            width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            object-fit: contain;
-        }
     </style>
 </head>
 <body class="container">
-    <h2>Video Compacto</h2>
-    
-    <!-- Botones de control -->
-    <div class="buttons">
+    <h2>Ruido en Video en Tiempo Real</h2>
+
+    <div class="controles-camara">
         <button class="btn" onclick="toggleCamera('start')">Encender</button>
         <button class="btn" onclick="toggleCamera('stop')">Apagar</button>
+    </div>
+
+    <!-- Botones de control -->
+    <div class="controls">
+
+        <!-- Selector de tipo de ruido -->
+        <div class="control-group">
+            <label for="noise-select">Tipo de Ruido:</label>
+            <select id="noise-select" onchange="updateParams()">
+                {% for key, label in noise_types.items() %}
+                <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Parámetros específicos -->
+        <div class="control-group" id="gaussian-controls">
+            <label for="mean-slider">Media (μ):</label>
+            <input type="range" id="mean-slider" min="-50" max="50" step="0.1" value="0" oninput="updateParams()">
+        </div>
+        <div class="control-group" id="std-controls">
+            <label for="std-slider">Desv. Estándar (σ):</label>
+            <input type="range" id="std-slider" min="0" max="50" step="0.1" value="0" oninput="updateParams()">
+        </div>
+        <div class="control-group" id="speckle-controls">
+            <label for="var-slider">Varianza (σ²):</label>
+            <input type="range" id="var-slider" min="0" max="1" step="0.01" value="0" oninput="updateParams()">
+        </div>
     </div>
 
     <!-- Contenedor de video -->
@@ -74,6 +117,32 @@
                     videoElement.src = "{{ url_for('parte1b.video_feed') }}?t=" + new Date().getTime();
                 });
         }
+
+        function updateParams() {
+            const noiseType = document.getElementById('noise-select').value;
+            const mean = document.getElementById('mean-slider').value;
+            const std = document.getElementById('std-slider').value;
+            const varVal = document.getElementById('var-slider').value;
+
+            // Mostrar/ocultar controles según el tipo de ruido
+            document.getElementById('gaussian-controls').style.display = 
+                noiseType === 'gaussian' ? 'flex' : 'none';
+            document.getElementById('std-controls').style.display = 
+                noiseType === 'gaussian' ? 'flex' : 'none';
+            document.getElementById('speckle-controls').style.display = 
+                noiseType === 'speckle' ? 'flex' : 'none';
+
+            // Actualizar video feed
+            const videoElement = document.getElementById('video-stream');
+            videoElement.src = `{{ url_for('parte1b.video_feed') }}?noise_type=${noiseType}&mean=${mean}&std=${std}&var=${varVal}&t=${new Date().getTime()}`;
+        }
+
+        // Inicializar visibilidad de controles
+        window.onload = () => {
+            document.getElementById('gaussian-controls').style.display = 'none';
+            document.getElementById('std-controls').style.display = 'none';
+            document.getElementById('speckle-controls').style.display = 'none';
+        };
     </script>
 </body>
 </html>
