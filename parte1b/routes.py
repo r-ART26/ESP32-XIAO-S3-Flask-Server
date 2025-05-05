@@ -23,13 +23,20 @@ def video_feed():
     mean = float(request.args.get('mean', 0))
     std = float(request.args.get('std', 0))
     var = float(request.args.get('var', 0))
+    kernel_size = int(request.args.get('kernel', 3))  # Nuevo parámetro para tamaño de máscara
 
-    # Validar que el tipo de ruido sea válido
+    # Validar tipo de ruido
     if noise_type not in NOISE_TYPES:
         noise_type = 'original'
 
     return Response(
-        generate_frames(noise_type=noise_type, mean=mean, std=std, var=var),
+        generate_frames(
+            noise_type=noise_type, 
+            mean=mean, 
+            std=std, 
+            var=var, 
+            kernel_size=kernel_size  # Pasar el nuevo parámetro
+        ),
         mimetype='multipart/x-mixed-replace; boundary=frame'
     )
 

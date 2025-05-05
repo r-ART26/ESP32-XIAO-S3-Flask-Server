@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parte 1B - Ruido en Video</title>
+    <title>Comparación de Filtros</title>
     <style>
         body {
             margin: 0;
@@ -18,6 +18,9 @@
             flex-direction: column;
             align-items: center;
             padding: 10px;
+        }
+        .camera-controls {
+            margin: 10px 0;
         }
         .controls {
             margin: 10px 0;
@@ -39,7 +42,7 @@
             width: 150px;
         }
         #video-container {
-            max-width: 240px;
+            max-width: 960px; /* 4 columnas * 240px */
             margin: 10px auto;
         }
         #video-stream {
@@ -65,16 +68,16 @@
     </style>
 </head>
 <body class="container">
-    <h2>Ruido en Video en Tiempo Real</h2>
+    <h2>Comparación de Filtros de Imagen</h2>
 
-    <div class="controles-camara">
+    <!-- Botones de encender/apagar cámara -->
+    <div class="camera-controls">
         <button class="btn" onclick="toggleCamera('start')">Encender</button>
         <button class="btn" onclick="toggleCamera('stop')">Apagar</button>
     </div>
 
-    <!-- Botones de control -->
+    <!-- Controles de ruido y tamaño de máscara -->
     <div class="controls">
-
         <!-- Selector de tipo de ruido -->
         <div class="control-group">
             <label for="noise-select">Tipo de Ruido:</label>
@@ -85,7 +88,7 @@
             </select>
         </div>
 
-        <!-- Parámetros específicos -->
+        <!-- Parámetros de ruido -->
         <div class="control-group" id="gaussian-controls">
             <label for="mean-slider">Media (μ):</label>
             <input type="range" id="mean-slider" min="-50" max="50" step="0.1" value="0" oninput="updateParams()">
@@ -97,6 +100,12 @@
         <div class="control-group" id="speckle-controls">
             <label for="var-slider">Varianza (σ²):</label>
             <input type="range" id="var-slider" min="0" max="1" step="0.01" value="0" oninput="updateParams()">
+        </div>
+
+        <!-- Selector de tamaño de máscara -->
+        <div class="control-group">
+            <label for="kernel-slider">Tamaño de Máscara:</label>
+            <input type="range" id="kernel-slider" min="3" max="7" step="2" value="3" oninput="updateParams()">
         </div>
     </div>
 
@@ -123,6 +132,7 @@
             const mean = document.getElementById('mean-slider').value;
             const std = document.getElementById('std-slider').value;
             const varVal = document.getElementById('var-slider').value;
+            const kernel = document.getElementById('kernel-slider').value;
 
             // Mostrar/ocultar controles según el tipo de ruido
             document.getElementById('gaussian-controls').style.display = 
@@ -132,12 +142,18 @@
             document.getElementById('speckle-controls').style.display = 
                 noiseType === 'speckle' ? 'flex' : 'none';
 
-            // Actualizar video feed
+            // Actualizar video feed con todos los parámetros
             const videoElement = document.getElementById('video-stream');
-            videoElement.src = `{{ url_for('parte1b.video_feed') }}?noise_type=${noiseType}&mean=${mean}&std=${std}&var=${varVal}&t=${new Date().getTime()}`;
+            videoElement.src = `{{ url_for('parte1b.video_feed') }}?
+                noise_type=${noiseType}
+                &mean=${mean}
+                &std=${std}
+                &var=${varVal}
+                &kernel=${kernel}
+                &t=${new Date().getTime()}`.replace(/\s+/g, '');
         }
 
-        // Inicializar visibilidad de controles
+        // Inicializar visibilidad de controles al cargar la página
         window.onload = () => {
             document.getElementById('gaussian-controls').style.display = 'none';
             document.getElementById('std-controls').style.display = 'none';
