@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parte 1B - Video Compacto</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f1bc;
+            font-family: Arial, sans-serif;
+            color: black;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        .buttons {
+            margin: 10px 0;
+        }
+        .btn {
+            padding: 8px 16px;
+            margin: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #d0d0d0;
+        }
+        #video-container {
+            max-width: 240px;  /* Igual a FRAME_WIDTH */
+            margin: 0 auto;
+        }
+        #video-stream {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="container">
+    <h2>Video Compacto</h2>
+    
+    <!-- Botones de control -->
+    <div class="buttons">
+        <button class="btn" onclick="toggleCamera('start')">Encender</button>
+        <button class="btn" onclick="toggleCamera('stop')">Apagar</button>
+    </div>
+
+    <!-- Contenedor de video -->
+    <div id="video-container">
+        <img id="video-stream" src="{{ url_for('parte1b.video_feed') }}" alt="Flujo de video">
+    </div>
+
+    <script>
+        const startCameraUrl = "{{ url_for('parte1b.start_camera_route') }}";
+        const stopCameraUrl = "{{ url_for('parte1b.stop_camera_route') }}";
+
+        function toggleCamera(action) {
+            const url = action === 'start' ? startCameraUrl : stopCameraUrl;
+            fetch(url)
+                .then(() => {
+                    const videoElement = document.getElementById('video-stream');
+                    videoElement.src = "{{ url_for('parte1b.video_feed') }}?t=" + new Date().getTime();
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,10 +1,12 @@
 from flask import Flask, render_template
 from parte1a.routes import parte1a_bp
+from parte1b.routes import parte1b_bp
 
 app = Flask(__name__)
 
 # Registrar Blueprint
 app.register_blueprint(parte1a_bp, url_prefix='/parte1a')
+app.register_blueprint(parte1b_bp, url_prefix='/parte1b')
 
 # Ruta raíz (menú principal)
 @app.route('/')
