@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparación de Filtros</title>
+    <title>Detección de Bordes</title>
     <style>
         body {
             margin: 0;
@@ -42,7 +42,7 @@
             width: 150px;
         }
         #video-container {
-            max-width: 960px; /* 4 columnas * 240px */
+            max-width: 720px; /* 3 columnas * 240px (ancho máximo requerido) */
             margin: 10px auto;
         }
         #video-stream {
@@ -68,7 +68,10 @@
     </style>
 </head>
 <body class="container">
-    <h2>Comparación de Filtros de Imagen</h2>
+    <div class="containerHeader">
+        <h1>Parte 1-b</h1>
+        <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
+    </div>
 
     <!-- Botones de encender/apagar cámara -->
     <div class="camera-controls">
