@@ -1,6 +1,7 @@
+#routes.py 1.a
 from flask import Blueprint, render_template, Response, request, redirect, url_for
 from .processing import generate_frames, start_camera, stop_camera, is_camera_active
-
+# from .processing import generate_motion_frames
 
 parte1a_bp = Blueprint('parte1a', __name__, 
                       template_folder='templates',
@@ -41,3 +42,10 @@ def start_camera_route():
 def stop_camera_route():
     stop_camera()
     return redirect(url_for('parte1a.index'))
+
+# @parte1a_bp.route('/motion_feed')
+# def motion_feed():
+#     return Response(
+#         generate_motion_frames(),
+#         mimetype='multipart/x-mixed-replace; boundary=frame'
+#     )

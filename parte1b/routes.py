@@ -1,3 +1,4 @@
+#routes.py 1.b
 from flask import Blueprint, render_template, Response, request, redirect, url_for
 from .processing import generate_frames, start_camera, stop_camera
 
