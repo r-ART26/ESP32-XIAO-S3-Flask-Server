@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from camera_utils import start_camera, stop_camera, get_frame
 
-FRAME_WIDTH = 240
+FRAME_WIDTH  = 240
 FRAME_HEIGHT = 180
 
 def apply_filter(image, filter_type, kernel_size):
@@ -15,20 +15,21 @@ def apply_filter(image, filter_type, kernel_size):
     return image  # 'none'
 
 def apply_edge_detection(image, edge_type):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     if edge_type == 'sobel':
-        sobel_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
-        sobel_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
-        edge = cv2.magnitude(sobel_x, sobel_y)
-        edge = np.uint8(255 * edge / np.max(edge))
+        sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        edge   = cv2.magnitude(sobel_x, sobel_y)
+        edge   = np.uint8(255 * edge / np.max(edge))
         return cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
     elif edge_type == 'canny':
-        v = np.median(image)
+        v     = np.median(gray)
         sigma = 0.33
         lower = int(max(0, (1.0 - sigma) * v))
         upper = int(min(255, (1.0 + sigma) * v))
-        edge = cv2.Canny(image, lower, upper)
+        edge  = cv2.Canny(gray, lower, upper)
         return cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
-    return np.zeros_like(cv2.cvtColor(image, cv2.COLOR_GRAY2BGR))
+    return np.zeros_like(image)
 
 def generate_frames(
     noise_type='original', mean=0.0, std=0.0, var=0.0,
@@ -53,8 +54,10 @@ def generate_frames(
             cv2.waitKey(200)
             continue
 
-        # Ya está redimensionada en camera_utils
-        # Aplicar ruido
+        # Redimensionar al tamaño esperado
+        frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT))
+
+        # Aplicar ruido opcional
         if noise_type == 'gaussian':
             noise = np.random.normal(mean, std, frame.shape).astype(np.float32)
             frame = np.clip(frame.astype(np.float32) + noise, 0, 255).astype(np.uint8)
@@ -62,23 +65,31 @@ def generate_frames(
             noise = np.random.randn(*frame.shape) * var
             frame = np.clip(frame.astype(np.float32) * (1 + noise), 0, 255).astype(np.uint8)
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        filtered = apply_filter(gray, filter_type, kernel_size)
-        edge_img = apply_edge_detection(filtered, edge_type)
+        # Original a color
+        original_color = frame
 
-        h, w = gray.shape
+        # Filtrado a color
+        filtered_color = apply_filter(original_color, filter_type, kernel_size)
+
+        # Detección de bordes (resultado en BGR)
+        edge_color = apply_edge_detection(filtered_color, edge_type)
+
+        # Combinar verticalmente las 3 vistas
+        h, w = FRAME_HEIGHT, FRAME_WIDTH
         combined = np.zeros((h * 3, w, 3), dtype=np.uint8)
-        combined[0:h]       = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-        combined[h:2*h]     = cv2.cvtColor(filtered, cv2.COLOR_GRAY2BGR)
-        combined[2*h:3*h]   = edge_img
+        combined[0:h]       = original_color
+        combined[h:2*h]     = filtered_color
+        combined[2*h:3*h]   = edge_color
 
-        cv2.putText(combined, "Original",      (10, 20),
+        # Etiquetas
+        cv2.putText(combined, "Original",            (10, 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1)
         cv2.putText(combined, f"Filtro: {filter_type}", (10, h + 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1)
-        cv2.putText(combined, f"Borde: {edge_type}",      (10, 2*h + 20),
+        cv2.putText(combined, f"Borde: {edge_type}",    (10, 2*h + 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1)
 
+        # Enviar frame
         ret, buf = cv2.imencode('.jpg', combined, [cv2.IMWRITE_JPEG_QUALITY, 70])
         if ret:
             yield (
@@ -87,9 +98,3 @@ def generate_frames(
                 buf.tobytes() +
                 b'\r\n'
             )
-
-def start_camera_route():
-    start_camera()
-
-def stop_camera_route():
-    stop_camera()
