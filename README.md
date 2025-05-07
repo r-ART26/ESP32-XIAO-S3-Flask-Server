@@ -42,3 +42,7 @@ Para desplegar el proyecto en local:
   python app.py
 ```
 
+## NOTAS
+* Estar conectado a la misma red que el esp32-S3
+* Cambiar la ip a la respectiva `IP   = "192.168.89.181"`
+* Cambiar el `ssid` y `password` del codigo de arduino dentro de `CameraWebServer/CameraWebServer.ino`
