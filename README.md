@@ -7,10 +7,6 @@ para la detección de bordes, operaciones morfológicas y normalización del his
 
 Sistema web que permite aplicar filtros de suavizado (Gaussiano, Mediana, Blur) y algoritmos de detección de bordes (Sobel, Canny) a video en tiempo real desde un esp32-S3, con controles dinámicos mediante una interfaz web.
 
-## Badges
-
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-
 
 ## Tech Stack
 **Backend :** Python (Flask)
