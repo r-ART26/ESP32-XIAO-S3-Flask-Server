@@ -29,7 +29,7 @@ Para desplegar el proyecto en local:
 ```bash
   source .venv/bin/activate.fish
 ```
-o en windows:
+O en windows:
 ```bash
   .venv/Scripts/activate
 ```
