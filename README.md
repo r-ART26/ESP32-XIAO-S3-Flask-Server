@@ -5,7 +5,7 @@ OBJETIVO:
 Reforzar los conocimientos adquiridos en clase sobre la aplicación de filtros para   reducción de ruido y kernels
 para la detección de bordes, operaciones morfológicas y normalización del histograma.
 
-Sistema web que permite aplicar filtros de suavizado (Gaussiano, Mediana, Blur) y algoritmos de detección de bordes (Sobel, Canny) a video en tiempo real desde la webcam, con controles dinámicos mediante una interfaz web.
+Sistema web que permite aplicar filtros de suavizado (Gaussiano, Mediana, Blur) y algoritmos de detección de bordes (Sobel, Canny) a video en tiempo real desde un esp32-S3, con controles dinámicos mediante una interfaz web.
 
 ## Badges
 
