@@ -29,6 +29,10 @@ Para desplegar el proyecto en local:
 ```bash
   source .venv/bin/activate.fish
 ```
+o en windows:
+```bash
+  .venv/Scripts/activate
+```
 
 ```bash
   pip install flask opencv-python numpy
